@@ -1,21 +1,12 @@
 let myName = "", currentRoom = "", selectedRank = null, pollInterval = null, aiThinking = false;
 
-/**
- * START SOLO MODE: Auto-adds "Computer" and starts immediately.
- */
 async function startSolo() {
     myName = "Player";
     currentRoom = "solo_" + Math.random().toString(36).substring(7);
-    
-    // Add You
     await fetch('/join', { method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ room_id: currentRoom, username: myName }) });
-    
-    // Add AI
     await fetch('/join', { method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ room_id: currentRoom, username: "Computer" }) });
-    
-    // Start Game
     await fetch('/start', { method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ room_id: currentRoom }) });
     
@@ -24,13 +15,10 @@ async function startSolo() {
     pollInterval = setInterval(updateGameState, 2000);
 }
 
-/**
- * JOIN FAMILY MODE: Waits for others in the lobby.
- */
 async function joinGame() {
     myName = document.getElementById('username').value.trim();
     currentRoom = document.getElementById('room-id').value.trim();
-    if(!myName || !currentRoom) return alert("Please enter Name and Room!");
+    if(!myName || !currentRoom) return alert("Enter Name & Table ID");
     
     await fetch('/join', { method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ room_id: currentRoom, username: myName }) });
@@ -46,9 +34,6 @@ async function triggerStart() {
         body: JSON.stringify({ room_id: currentRoom }) });
 }
 
-/**
- * THE HEARTBEAT: Checks the server for updates.
- */
 async function updateGameState() {
     const res = await fetch('/join', { method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ room_id: currentRoom, username: myName }) });
@@ -61,14 +46,6 @@ async function updateGameState() {
     }
 
     if (state.gameStarted) {
-        // Handle Turn Skipping if Hand is Empty
-        if (state.currentTurn === myName && state.yourHand.length === 0 && state.deckCount === 0) {
-            console.log("No cards left, skipping turn...");
-            await fetch('/ask', { method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ room_id: currentRoom, username: myName, target_player: Object.keys(state.others)[0], rank: 'SKIP' }) });
-            return;
-        }
-
         document.getElementById('waiting-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'block';
         renderUI(state);
@@ -84,99 +61,67 @@ async function handleAI() {
     const res = await fetch('/ai-move', { method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ room_id: currentRoom }) });
     const data = await res.json();
-    
-    if(data.message) {
-        const msgBox = document.getElementById('status-msg');
-        msgBox.innerText = data.message;
-        msgBox.style.color = "var(--accent-color)"; 
-    }
+    if(data.message) document.getElementById('status-msg').innerText = data.message;
     aiThinking = false;
 }
 
-/**
- * THE RENDERER: Draws the board with V2 Classes and Positioning.
- */
 function renderUI(state) {
-    // 1. Handle HUD (Top Stats)
     document.getElementById('deck-size').innerText = state.deckCount;
     document.getElementById('p-books').innerText = state.yourBooks;
     
     const isMyTurn = state.currentTurn === myName;
     const turnIndicator = document.getElementById('turn-indicator');
-    turnIndicator.innerText = isMyTurn ? "★ YOUR TURN ★" : `${state.currentTurn.toUpperCase()}'S TURN`;
-    turnIndicator.style.color = isMyTurn ? "var(--accent-color)" : "var(--muted-color)";
+    turnIndicator.innerText = isMyTurn ? "★ Your Turn ★" : `${state.currentTurn}'s Turn`;
 
-    // 2. Render Your Cards (Vertical Fan/Stack Logic)
+    // Render Hand
     const pArea = document.getElementById('player-area');
     pArea.innerHTML = '';
-    
-    state.yourHand.forEach((card, index) => {
+    state.yourHand.forEach(card => {
         const div = document.createElement('div');
-        div.className = 'card-v2';
+        div.className = 'card';
+        if (card.suit === '♥' || card.suit === '♦') div.style.color = '#d40000';
         
-        // Suit color logic
-        if (card.suit === '♥' || card.suit === '♦') div.style.color = '#e53e3e'; // Modern Red
-        else div.style.color = '#1a202c'; // Modern Black
+        div.innerHTML = `<div>${card.rank}</div><div style="font-size:2.5rem">${card.suit}</div>`;
         
-        div.innerHTML = `<span>${card.rank}</span><span>${card.suit}</span>`;
-        
-        // Fan Positioning: Cards overlap by 35px
-        div.style.left = `${35 * index}px`; 
-        div.style.zIndex = index; 
+        if(selectedRank === card.rank) div.classList.add('selected');
 
         div.onclick = () => { 
             if(isMyTurn) { 
-                selectedRank = card.rank; 
-                // Remove 'selected' class from all cards, then add to this one
-                document.querySelectorAll('.card-v2').forEach(c => c.classList.remove('selected'));
-                div.classList.add('selected');
-                document.getElementById('ask-btn').disabled = false; 
+                selectedRank = card.rank;
+                renderUI(state); // Re-render to show selection
+                document.getElementById('ask-btn').disabled = false;
             }
         };
         pArea.appendChild(div);
     });
 
-    // 3. Handle Opponents & Target Box
+    // Handle Opponents
     const oppContainer = document.getElementById('opponents-container');
     const select = document.getElementById('target-player-select');
     oppContainer.innerHTML = ''; 
     select.innerHTML = '';
 
     const opponentNames = Object.keys(state.others);
-
     if (opponentNames.length === 1) {
-        // SOLO: Hide the target dropdown
-        select.classList.add("d-none");
+        select.style.display = "none";
         select.innerHTML = `<option value="${opponentNames[0]}" selected></option>`;
     } else {
-        // MULTIPLAYER: Show the target dropdown
-        select.classList.remove("d-none");
-        select.innerHTML = '<option value="">Who?</option>';
+        select.style.display = "inline-block";
+        select.innerHTML = '<option value="">Target Player</option>';
     }
 
     opponentNames.forEach(name => {
         const info = state.others[name];
-        
-        // Use V2 Sidebar Slot styling
-        const div = document.createElement('div');
-        div.className = `opponent-slot-v2 ${state.currentTurn === name ? 'active-turn' : ''}`;
-        div.innerHTML = `
-            <div class="opp-name">${name.toUpperCase()}</div>
-            <div class="opp-stats">
-                Books: ${info.books} | Cards: ${info.cards}
-            </div>
-        `;
-        oppContainer.appendChild(div);
-        
-        if (opponentNames.length > 1) {
-            select.innerHTML += `<option value="${name}">${name}</option>`;
-        }
+        const isActive = state.currentTurn === name;
+        oppContainer.innerHTML += `
+            <div class="opponent-slot ${isActive ? 'active-turn' : ''}">
+                <strong style="color:var(--gold)">${name}</strong><br>
+                Books: ${info.books}<br>Cards: ${info.cards}
+            </div>`;
+        if (opponentNames.length > 1) select.innerHTML += `<option value="${name}">${name}</option>`;
     });
 }
 
-/**
- * THE ACTION: Sending your move to Python.
- */
 async function performAsk() {
     const target = document.getElementById('target-player-select').value;
     if(!target || !selectedRank) return;
@@ -185,37 +130,16 @@ async function performAsk() {
         body: JSON.stringify({ room_id: currentRoom, username: myName, target_player: target, rank: selectedRank }) });
     const data = await res.json();
     
-    const msgBox = document.getElementById('status-msg');
-    msgBox.innerText = data.message;
-    msgBox.style.color = "white"; 
+    document.getElementById('status-msg').innerText = data.message;
     document.getElementById('ask-btn').disabled = true;
-    
-    // Clear selection visually
     selectedRank = null;
-    document.querySelectorAll('.card-v2').forEach(c => c.classList.remove('selected'));
 }
 
-/**
- * THE FINALE: Show the results.
- */
 function showVictory(state) {
     let winner = "You";
     let maxBooks = state.yourBooks;
-
     for(const [name, info] of Object.entries(state.others)) {
-        if(info.books > maxBooks) {
-            maxBooks = info.books;
-            winner = name;
-        }
+        if(info.books > maxBooks) { maxBooks = info.books; winner = name; }
     }
-
-    document.getElementById('game-screen').innerHTML = `
-        <div class="full-vh flex-col flex-center text-center">
-            <h1 style="font-family: var(--font-logo); font-size: 4rem; color: var(--accent-color);">
-                ${winner === "You" ? "VICTORY" : winner.toUpperCase() + " WINS"}
-            </h1>
-            <p style="font-size: 1.5rem;">Final Score: ${maxBooks} Books</p>
-            <button onclick="location.reload()" class="btn-main" style="width: auto; margin-top: 2rem;">RESTART SESSION</button>
-        </div>
-    `;
+    document.body.innerHTML = `<div class="screen-overlay"><div class="casino-card"><h1>${winner === "You" ? "🏆 YOU WIN!" : "Dealer Wins"}</h1><p>Final Score: ${maxBooks} Books</p><button class="gold-btn" onclick="location.reload()">New Game</button></div></div>`;
 }
