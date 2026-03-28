@@ -7,198 +7,246 @@
     --text-white: #f5f5f5;
 }
 
+/* 1. Base Reset - Prevents Page Scrolling */
 body, html {
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100vh;
+    width: 100vw;
     font-family: 'Crimson Pro', serif;
     background: #000;
-    overflow: hidden;
+    overflow: hidden; 
 }
 
-/* Screen Overlays (Setup/Waiting) */
+/* 2. Setup & Waiting Screens */
 .screen-overlay {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://www.transparenttextures.com/patterns/dark-leather.png');
+    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://www.transparenttextures.com/patterns/dark-leather.png');
 }
 
 .casino-card {
     background: var(--felt-green);
-    padding: 40px;
+    padding: 30px;
     border-radius: 15px;
     border: 3px solid var(--gold);
     box-shadow: 0 0 50px rgba(0,0,0,1);
     text-align: center;
     color: var(--text-white);
+    max-width: 400px;
 }
 
-.logo { font-size: 3rem; margin: 0; color: var(--gold); }
-.tagline { margin-bottom: 30px; letter-spacing: 2px; opacity: 0.8; }
+.logo { font-size: 2.5rem; margin: 0; color: var(--gold); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+.divider { margin: 15px 0; color: var(--gold); font-size: 0.8rem; font-weight: bold; }
 
-/* The Game Table */
+input {
+    padding: 10px;
+    margin: 5px 0;
+    width: 80%;
+    border-radius: 4px;
+    border: 1px solid var(--gold);
+    background: rgba(0,0,0,0.2);
+    color: white;
+}
+
+/* 3. The Main Game Table Layout */
 .game-table {
     height: 100vh;
-    background: radial-gradient(circle at center, var(--felt-green) 0%, var(--dark-felt) 100%);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 20px;
-    position: relative;
+    background: radial-gradient(circle at center, var(--felt-green) 0%, var(--dark-felt) 100%);
+    padding: 10px 20px;
+    box-sizing: border-box;
 }
 
-/* HUD */
+/* Top HUD */
 .table-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid rgba(212, 175, 55, 0.3);
-    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    height: 50px;
+    flex-shrink: 0;
 }
 
 .stat-box {
     background: rgba(0,0,0,0.4);
-    padding: 10px 20px;
+    padding: 5px 15px;
     border: 1px solid var(--gold);
     border-radius: 5px;
     color: var(--gold);
     font-weight: bold;
+    font-size: 0.9rem;
 }
 
 .turn-announcer {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     color: var(--gold);
     text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
 }
 
-/* Opponents */
+/* Opponents Section */
 .opponents-row {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
+    margin-top: 10px;
+    height: 70px;
+    flex-shrink: 0;
 }
 
 .opponent-slot {
     background: rgba(0,0,0,0.3);
-    padding: 15px;
-    border-radius: 10px;
+    padding: 8px;
+    border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.1);
-    min-width: 120px;
+    min-width: 100px;
     text-align: center;
+    color: white;
+    font-size: 0.8rem;
 }
 
 .opponent-slot.active-turn {
     border-color: var(--gold);
-    box-shadow: 0 0 15px var(--gold);
+    box-shadow: 0 0 10px var(--gold);
+    background: rgba(212, 175, 55, 0.1);
 }
 
-/* Table Center */
+/* Center Table (Dynamic Space) */
 .table-center {
-    flex: 1;
+    flex-grow: 1; /* This expands to fill available space */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    min-height: 100px;
 }
 
 .status-msg-wrap {
     background: rgba(0,0,0,0.6);
-    padding: 10px 30px;
+    padding: 8px 25px;
     border-radius: 50px;
     color: var(--gold);
-    font-size: 1.2rem;
-    margin-bottom: 20px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    text-align: center;
 }
 
 .deck-visual {
-    width: 80px;
-    height: 110px;
-    background: #b00; /* Red back */
-    border: 3px solid white;
-    border-radius: 8px;
-    box-shadow: 4px 4px 0 #800, 8px 8px 0 #500;
+    width: 60px;
+    height: 85px;
+    background: #b00;
+    border: 2px solid white;
+    border-radius: 6px;
+    box-shadow: 3px 3px 0 #800, 6px 6px 0 #500;
 }
 
-/* Fanned Cards */
+/* Player Zone (Fixed at Bottom) */
+.player-zone {
+    height: 200px; /* Locked height to keep buttons visible */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 15px;
+    flex-shrink: 0;
+}
+
 .fanned-hand {
     display: flex;
     justify-content: center;
-    height: 180px;
-    margin-bottom: 20px;
+    height: 110px;
+    margin-bottom: 10px;
+    width: 100%;
 }
 
 .card {
-    width: 90px;
-    height: 130px;
+    width: 75px;
+    height: 110px;
     background: white;
     color: black;
-    border-radius: 8px;
-    margin-left: -40px; /* Overlap */
+    border-radius: 6px;
+    margin-left: -35px; /* Rummy overlap */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 10px;
+    padding: 8px;
     box-sizing: border-box;
     font-weight: bold;
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     cursor: pointer;
-    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-    transition: transform 0.2s, margin 0.2s;
+    box-shadow: -4px 0 10px rgba(0,0,0,0.4);
+    transition: transform 0.2s;
     border: 2px solid transparent;
 }
 
 .card:first-child { margin-left: 0; }
 
 .card:hover {
-    transform: translateY(-40px) rotate(-3deg);
+    transform: translateY(-35px) rotate(-2deg);
     z-index: 100;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .card.selected {
     border-color: var(--gold);
-    transform: translateY(-40px);
-    box-shadow: 0 0 20px var(--gold);
+    transform: translateY(-35px);
+    box-shadow: 0 0 15px var(--gold);
     z-index: 99;
 }
 
-/* Controls */
+/* 4. Action Buttons (The UI Fix) */
 .action-bar {
     display: flex;
     justify-content: center;
-    gap: 15px;
-    padding-bottom: 20px;
+    gap: 12px;
+    width: 100%;
+    z-index: 110;
 }
 
 .gold-btn {
     background: linear-gradient(to bottom, var(--gold-hover), var(--gold));
     border: none;
-    padding: 12px 25px;
-    border-radius: 5px;
+    padding: 10px 20px;
+    border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
-    text-transform: uppercase;
+    color: black;
 }
 
 .ask-btn-royale {
     background: linear-gradient(to bottom, #d4af37, #8b6508);
     color: white;
     border: 1px solid #554000;
-    padding: 12px 40px;
-    border-radius: 5px;
+    padding: 10px 35px;
+    border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 3px 0 #554000;
+    text-transform: uppercase;
+    font-size: 0.9rem;
 }
 
-.ask-btn-royale:disabled { opacity: 0.5; cursor: not-allowed; }
+.ask-btn-royale:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #554000;
+}
+
+.ask-btn-royale:disabled {
+    filter: grayscale(1);
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
 
 .rummy-select {
-    padding: 10px;
-    border-radius: 5px;
-    background: #222;
+    padding: 8px;
+    border-radius: 4px;
+    background: #111;
     color: white;
     border: 1px solid var(--gold);
+    font-family: inherit;
 }
