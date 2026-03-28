@@ -1,0 +1,173 @@
+/* ==============================
+   1. The Core & Palette (Ocean Noir)
+   ============================== */
+:root {
+    --bg-color: #050a14;      /* Near Black Deep Sea */
+    --primary-color: #00f2fe; /* Cyber Teal */
+    --accent-color: #ffd700;  /* Gold Dust */
+    --text-color: #ffffff;
+    --muted-color: #4a5568;   /* Steel Grey */
+    --card-bg: #f7fafc;
+    
+    /* Font Stack */
+    --font-main: 'Roboto Mono', monospace;
+    --font-logo: 'Major Mono Display', monospace;
+}
+
+* { box-sizing: border-box; }
+body { 
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-main);
+    margin: 0;
+    overflow: hidden; /* We handle scrolling in specific containers */
+}
+
+/* Utilities */
+.full-vh { height: 100vh; }
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.flex-col { flex-direction: column; }
+.flex-justify { display: flex; justify-content: space-around; }
+.gap-1 { gap: 1rem; }
+.d-none { display: none !important; }
+.highlight-txt { color: var(--primary-color); font-weight: bold; }
+
+/* ==============================
+   2. Setup & Lobby Screens
+   ============================== */
+.setup-screen {
+    background-image: radial-gradient(circle at center, #0a1f3d 0%, var(--bg-color) 70%);
+}
+
+.logo-area { margin-bottom: 3rem; text-align: center; }
+.logo-area h1 { 
+    font-family: var(--font-logo); font-size: 4rem; margin: 0;
+    color: var(--primary-color);
+}
+.subtitle { color: var(--accent-color); font-size: 0.9rem; margin: 0; }
+
+.menu-ui { background: rgba(255,255,255,0.03); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 350px; }
+
+input { 
+    background: transparent; color: var(--text-color); border: none; border-bottom: 2px solid var(--muted-color);
+    padding: 12px; margin: 8px 0; width: 100%; transition: 0.3s;
+}
+input:focus { outline: none; border-bottom-color: var(--primary-color); }
+
+.divider { display: flex; align-items: center; text-align: center; color: var(--muted-color); margin: 1.5rem 0; font-size: 0.8rem; }
+.divider .line { flex: 1; height: 1px; background: var(--muted-color); }
+.divider .text { margin: 0 10px; }
+
+/* Modern Buttons */
+.btn-main, .btn-sub { padding: 12px 24px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; transition: 0.3s; width: 100%; }
+.btn-main { background: var(--primary-color); color: var(--bg-color); text-transform: uppercase; }
+.btn-sub { background: transparent; color: var(--muted-color); border: 1px solid var(--muted-color); font-weight: normal; }
+
+.btn-main:hover { transform: scale(1.03); box-shadow: 0 0 15px rgba(0,242,254,0.4); }
+.btn-sub:hover { color: var(--text-color); border-color: var(--text-color); }
+.btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ==============================
+   3. Main Game Layout & HUD
+   ============================= */
+.game-wrapper {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Minimal Stats (Moved to top right) */
+.top-HUD { 
+    position: fixed; top: 1rem; right: 1rem;
+    display: flex; gap: 1.5rem; background: rgba(0,0,0,0.6);
+    padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+    z-index: 10;
+}
+.hud-item { text-align: center; font-size: 0.8rem; }
+.hud-item .label { display: block; color: var(--muted-color); font-weight: normal; }
+.hud-item .value { font-size: 1.1rem; color: var(--text-color); font-weight: bold; }
+.hud-turn-item { color: var(--accent-color); font-size: 0.9rem; font-weight: bold; border-left: 2px solid var(--accent-color); padding-left: 1rem; display: flex; align-items: center; }
+
+/* Playing Field (Sideways Layout) */
+.playing-field {
+    display: flex; height: 100vh; padding-top: 5rem;
+}
+
+/* Sidebar Opponents */
+#opponents-sidebar {
+    width: 250px; border-right: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem; overflow-y: auto;
+    background: linear-gradient(to right, #050a14 0%, #071224 100%);
+}
+.section-label { font-size: 0.7rem; color: var(--muted-color); text-transform: uppercase; margin-bottom: 1rem; }
+
+.opponent-slot-v2 {
+    background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 12px;
+    border: 1px solid transparent; transition: 0.2s; font-size: 0.9rem;
+}
+.opponent-slot-v2.active-turn { border-color: var(--accent-color); background: rgba(255,215,0,0.05); }
+.opp-name { color: var(--primary-color); font-weight: bold; }
+.opp-stats { color: var(--muted-color); font-size: 0.8rem; }
+
+/* Center Play Area */
+.center-play {
+    flex: 1; display: flex; flex-direction: column; justify-content: space-between;
+    padding: 2rem;
+}
+
+/* Status Bubble (Moved above the hand) */
+.status-bubble-v2 {
+    text-align: center; min-height: 40px; margin-bottom: 2rem; color: var(--primary-color); font-size: 1rem; font-family: var(--font-logo); text-transform: uppercase;
+}
+
+/* ==============================
+   4. The Hand (Fan & Vertical Stack)
+   ============================== */
+.player-hand-wrapper {
+    flex: 1; display: flex; justify-content: center; align-items: center;
+    position: relative;
+}
+
+.hand-v2 {
+    display: flex;
+    justify-content: center;
+    /* We make the cards stack slightly on top of each other */
+    position: relative;
+    width: 80%;
+}
+
+.card-v2 { 
+    width: 70px; height: 105px;
+    background-color: var(--card-bg); color: #000;
+    border-radius: 8px; cursor: pointer;
+    font-weight: bold; font-size: 1.4rem; font-family: var(--font-logo); text-transform: uppercase;
+    border: 2px solid transparent; transition: all 0.2s;
+
+    /* The Stack: Each card is positioned slightly shifted from the previous one */
+    position: absolute;
+    box-shadow: -5px 0 10px rgba(0,0,0,0.3);
+}
+
+/* Suit Color Logic from JS still works, this just adds the hover */
+.card-v2:hover { 
+    transform: translateY(-25px); /* Primary movement on hover */
+    z-index: 10 !important; /* Forces the hovered card to the top */
+    box-shadow: 0 5px 20px rgba(0,242,254,0.3);
+}
+
+/* Visual Indicator for Selection */
+.card-v2.selected {
+    border-color: var(--accent-color) !important;
+    transform: translateY(-25px);
+    box-shadow: 0 0 15px rgba(255,215,0,0.5);
+}
+
+/* ==============================
+   5. Action Controls V2
+   ============================== */
+.controls-v2 { margin-top: auto; padding-bottom: 1rem; }
+
+/* multiplayer specific select dropdown */
+#target-player-select {
+    background: transparent; color: var(--text-color); border: 1px solid var(--muted-color); padding: 8px; border-radius: 5px;
+}
